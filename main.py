@@ -8,8 +8,10 @@ app = Flask(__name__)
 
 URL = "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json"
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Accept": "application/json, text/plain, */*",
+    "Content-Type": "application/json;charset=UTF-8",
+    "Origin": "https://bdgwinor.com",
     "Referer": "https://bdgwinor.com/"
 }
 
@@ -43,13 +45,15 @@ HTML_TEMPLATE = """
         .signal-box { background: #1a1a1a; border: 2px dashed #d4af37; border-radius: 10px; padding: 15px; margin-top: 15px; }
         .signal-title { font-size: 14px; color: #aaa; }
         .signal-value { font-size: 24px; font-weight: bold; color: #00ff88; margin-top: 5px; }
+        .refresh-btn { background: linear-gradient(45deg, #d4af37, #ffdf73); color: #000; border: none; padding: 12px; font-size: 15px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 15px; box-shadow: 0 4px 10px rgba(212,175,55,0.4); }
+        .refresh-btn:active { transform: scale(0.98); }
         .footer { font-size: 11px; color: #777; margin-top: 15px; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">👑 KING BHAI VIP - ORACLE RADAR 👑</div>
-        <div style="font-size: 11px; color: #00ff88;">HOST: Wingo Server [CONNECTED]</div>
+        <div style="font-size: 11px; color: #00ff88;">HOST: Render Server [CONNECTED]</div>
         
         <div class="info-box">
             <span>Current Period:</span>
@@ -81,7 +85,10 @@ HTML_TEMPLATE = """
             <div style="font-size: 12px; color: #ffdf73; margin-top: 8px;">Status: {{ state.last_result }}</div>
         </div>
 
-        <div class="footer">Auto-syncing every 10 seconds. Enjoy VIP Edge!</div>
+        <!-- Manual Check Result / Refresh Button -->
+        <button class="refresh-btn" onclick="location.reload()">🔄 CHECK RESULT / REFRESH</button>
+
+        <div class="footer">Auto-syncing active. Enjoy VIP Edge!</div>
     </div>
 </body>
 </html>
@@ -94,7 +101,8 @@ def background_worker():
 
     while True:
         try:
-            response = requests.get(URL, headers=HEADERS, timeout=10)
+            payload = {"pageNo": 1, "pageSize": 10}
+            response = requests.post(URL, headers=HEADERS, json=payload, timeout=10)
             if response.status_code == 200:
                 data = response.json()
                 items = data.get('data', {}).get('list', [])
