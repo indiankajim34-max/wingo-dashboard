@@ -23,7 +23,7 @@ app_state = {
     "period": "Fetching...",
     "prediction_type": "WAITING",
     "prediction_num": 0,
-    "last_result": "System Initializing..."
+    "last_result": "Connecting to API..."
 }
 
 HTML_TEMPLATE = """
@@ -103,6 +103,8 @@ def background_worker():
         try:
             payload = {"pageNo": 1, "pageSize": 10}
             response = requests.post(URL, headers=HEADERS, json=payload, timeout=10)
+            print(f"API Response Code: {response.status_code}")
+            
             if response.status_code == 200:
                 data = response.json()
                 items = data.get('data', {}).get('list', [])
@@ -137,9 +139,14 @@ def background_worker():
                     app_state["prediction_type"] = pred_t
                     app_state["prediction_num"] = pred_n
                     last_eval_issue = act_issue
-        except Exception:
-            pass
-        time.sleep(12)
+                else:
+                    app_state["last_result"] = "API List Empty!"
+            else:
+                app_state["last_result"] = f"API Error: {response.status_code}"
+        except Exception as e:
+            print(f"Worker Error: {e}")
+            app_state["last_result"] = f"Error: {str(e)[:25]}"
+        time.sleep(10)
 
 @app.route('/')
 def home():
