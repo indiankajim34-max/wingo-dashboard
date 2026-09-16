@@ -9,12 +9,22 @@ app = Flask(__name__)
 URL = "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json"
 REFERER_URL = "https://bdgwinor.com/"
 
+# Asli mobile browser ke exact headers taaki firewall pakड़ न सके
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    "Host": "draw.ar-lottery01.com",
+    "Connection": "keep-alive",
+    "sec-ch-ua": "\"Chromium\";v=\"122\", \"Not(A:Brand\";v=\"8\", \"Google Chrome\";v=\"122\"",
     "Accept": "application/json, text/plain, */*",
-    "Content-Type": "application/json;charset=UTF-8",
+    "sec-ch-ua-mobile": "?1",
+    "User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36",
+    "sec-ch-ua-platform": "\"Android\"",
     "Origin": "https://bdgwinor.com",
-    "Referer": "https://bdgwinor.com/"
+    "Sec-Fetch-Site": "cross-site",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Dest": "empty",
+    "Referer": "https://bdgwinor.com/",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Accept-Language": "en-US,en;q=0.9,hi;q=0.8"
 }
 
 app_state = {
@@ -25,7 +35,7 @@ app_state = {
     "period": "Fetching...",
     "prediction_type": "WAITING",
     "prediction_num": 0,
-    "last_result": "Connecting via CloudScraper..."
+    "last_result": "Bypassing Firewall..."
 }
 
 HTML_TEMPLATE = """
@@ -55,7 +65,7 @@ HTML_TEMPLATE = """
 <body>
     <div class="container">
         <div class="header">👑 KING BHAI VIP - ORACLE RADAR 👑</div>
-        <div style="font-size: 11px; color: #00ff88;">HOST: Render Server [BYPASSED]</div>
+        <div style="font-size: 11px; color: #00ff88;">HOST: Render Server [STEALTH MODE]</div>
         
         <div class="info-box">
             <span>Current Period:</span>
@@ -101,14 +111,13 @@ def background_worker():
     last_eval_issue = None
     current_pred = None
 
-    # Cloudscraper instance create karte hain jo 403 block ko bypass karega
     scraper = cloudscraper.create_scraper()
 
     while True:
         try:
             payload = {"pageNo": 1, "pageSize": 10}
             response = scraper.post(URL, headers=HEADERS, json=payload, timeout=10)
-            print(f"CloudScraper Response Code: {response.status_code}")
+            print(f"Stealth Response Code: {response.status_code}")
             
             if response.status_code == 200:
                 data = response.json()
@@ -147,7 +156,8 @@ def background_worker():
                 else:
                     app_state["last_result"] = "API List Empty!"
             else:
-                app_state["last_result"] = f"Bypassed Error: {response.status_code}"
+                print(f"Error Body: {response.text[:150]}y")
+                app_state["last_result"] = f"Blocked: HTTP {response.status_code}"
         except Exception as e:
             print(f"Worker Error: {e}")
             app_state["last_result"] = f"Error: {str(e)[:25]}"
